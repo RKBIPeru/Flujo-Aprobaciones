@@ -1,23 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Solicitud rechazada</title>
+  <meta charset="UTF-8" />
+  <title>Rechazo Registrado</title>
   <style>
     body {
       font-family: Calibri, sans-serif;
+      color: #002060;
+      font-size: 16px;
       text-align: center;
-      margin-top: 100px;
-      color: #a94442;
+      padding: 80px 20px;
     }
-    .xmark {
-      font-size: 80px;
+    .msg {
+      border: 2px solid #fbba00;
+      display: inline-block;
+      padding: 30px;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="xmark">❌</div>
-  <h1>Solicitud rechazada</h1>
-  <p>Se ha registrado tu respuesta correctamente.</p>
+  <div class="msg" id="mensaje">
+    ⏳ Procesando rechazo...
+  </div>
+
+  <script>
+    // Obtener parámetros de la URL
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    // Validar que hay datos
+    if (id) {
+      const respuesta = "Rechazado";
+      const url = `https://prod-140.westus.logic.azure.com:443/workflows/f9c600b5c9014b7b82be98d54b37db25/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gyZFtXnYVgMAdYWcODQduHJh5q6lpWCmv3uJp-OwO04&respuesta=${respuesta}&id=${id}`;
+
+      fetch(url)
+        .then(response => {
+          if (response.status === 200 || response.status === 202) {
+            document.getElementById("mensaje").innerHTML = "❌ La solicitud ha sido rechazada correctamente.";
+          } else if (response.status === 409) {
+            document.getElementById("mensaje").innerHTML = "⚠️ Esta solicitud ya fue respondida previamente.";
+          } else {
+            document.getElementById("mensaje").innerHTML = "⚠️ Ocurrió un error al procesar el rechazo.";
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          document.getElementById("mensaje").innerHTML = "❌ No se pudo conectar con el sistema. Intenta nuevamente.";
+        });
+    } else {
+      document.getElementById("mensaje").innerHTML = "❌ Parámetro ID faltante en el enlace.";
+    }
+  </script>
 </body>
 </html>
